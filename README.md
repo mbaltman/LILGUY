@@ -13,8 +13,12 @@ Based on Lua - https://www.lua.org/about.html
 <img src="/Screenshots/lilguy_0.gif" width="300" height="300">
 
 To Do List: 
+- [ ] Create level objects
 - [ ] Only go up on ladders
 - [ ] Only move on platforms 
 - [ ] exit door asset
+- [ ] gutter asset 
+- [ ] Level one character and decoration 
+
 
 
