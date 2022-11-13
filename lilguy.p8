@@ -1,41 +1,40 @@
 pico-8 cartridge // http://www.pico-8.com
 version 38
 __lua__
-opp_x=0 opp_y=0
+//global functions and variables
+level = {
+         diag_ladders={},
+         straight_ladders={},
+         balconies={}}
 
-function _init()
-poke4(0x5f10,0x8382.8180)
-poke4(0x5f14,0x8786.8584)
-poke4(0x5f18,0x8b8a.8988)
-poke4(0x5f1c,0x8f8e.8d8c)
-   opp_x = 50
-   opp_y = 100
+function level:new (o)
+   o = o or {}
+   setmetatable(o,self)
+   self.__index = self 
+   self.diag_ladders = {}
+   self.straight_ladders = {}
+   self.balconies = {}
+   return o
 end
 
-function _draw()
-   cls()
-   draw_background()
-   draw_opossum(opp_x, opp_y)
-   draw_foreground()
-   camera(0,0)
-end
+opp_pos = {0,0}
 
-function _update()
-  can_climb = check_can_climb()
-  if(btn(0)) opp_x -= 1
-  if(btn(1)) opp_x += 1
-  if(can_climb)
-  then
-    if(btn(2)) opp_y -= 1
-  	 if(btn(3)) opp_y += 1
-  end
-  
+opp_state = "walk"
+opp_flip = {false,false}
 
-end
-   
+l1 = level:new(nil)
+l1.diag_ladders[1] = {56,80}
+l1.diag_ladders[2] = {64,72}
+l1.diag_ladders[3] = {72,64}
+l1.straight_ladders[1] = {56,99}
+l1.straight_ladders[2] = {56,107}
+l1.straight_ladders[3] = {56, 115}
+
+
 
 -->8
-function draw_background()
+//drawing functions
+function draw_background(level)
    palt()
    // draw building
    map(0,0 ,0,0,  16, 16,0)
@@ -44,11 +43,8 @@ function draw_background()
    palt(0, false)
    palt(15,true) 
    
-   draw_ladder(56,99,false)
-   draw_ladder(56,107,false)
-   draw_ladder(56,80, true)
-   draw_ladder(64,72, true)
-   draw_ladder(72,64, true)
+   foreach(level.straight_ladders,draw_ladder_straight)
+   foreach(level.diag_ladders,draw_ladder_diag)   
    palt() 
 end
 
@@ -63,26 +59,98 @@ function draw_foreground()
 end
 
 
-function draw_opossum(sx,sy)
-   spr(41,sx,sy)
+function draw_opossum(sx,sy, state, flipped)
+   print(state)
+   index = 41 
+   if ( state == "climb" ) 
+   then
+      index = 42
+   end
+   spr(index,sx,sy,1,1,flipped[1], flipped[2])
 end
 
-function check_can_climb()
-  return true
+function check_can_climb(level)
+  loc_x = opp_x + 4
+  loc_y = opp_y + 7 
+  for ladder in all(level.straight_ladders)
+  do
+     lad_x = ladder[1] + 4
+     lad_y = ladder[2] + 4
+     if ( abs(loc_x - lad_x ) < 4 and
+          abs(loc_y - lad_y ) < 7 ) 
+     then
+       return true
+     end     
+  end
+  
+  for ladder in all(level.diag_ladders)
+  do
+  end
+  return false
 end
+
+
+
 -->8
 function draw_gate(x_pos, y_pos)  
    map(16,0,x_pos,y_pos,7,2,0)	
 end
 
-function draw_ladder(x_pos, y_pos, diagonal)
-  if(diagonal)
-  then
-     spr(23,x_pos,y_pos,2,1) 
-  else
-     spr(28,x_pos,y_pos)
-  end  
+function draw_ladder_straight(coord) 
+  spr(28,coord[1],coord[2])  
 end
+
+function draw_ladder_diag(coord)
+  spr(23,coord[1],coord[2],2,1)
+end
+-->8
+function _init()
+  poke4(0x5f10,0x8382.8180)
+  poke4(0x5f14,0x8786.8584)
+  poke4(0x5f18,0x8b8a.8988)
+  poke4(0x5f1c,0x8f8e.8d8c)
+  opp_pos = {50,122}
+  end
+
+function _draw()
+   cls()
+   draw_background(l1)
+   draw_opossum(opp_pos[1], opp_pos[2],opp_state, opp_flip)
+   draw_foreground()
+   camera(0,0)
+end
+
+function _update()
+  can_climb = check_can_climb(l1)
+  if(btn(0))
+  then  
+     opp_state = "walk" 
+     opp_pos[1] -= 1
+     opp_flip = {true,false}
+  end
+  if(btn(1)) 
+  then 
+     opp_state ="walk"
+     opp_pos[1] += 1
+     opp_flip = {false,false}
+  end
+  if(can_climb)
+  then
+    if(btn(2)) 
+    then 
+       opp_state = "climb"
+       opp_pos[2] -= 1
+       opp_flip = {false,false}
+  	 end
+  	 if(btn(3)) 
+  	 then 
+  	    opp_state ="climb"
+  	    opp_pos[2] += 1
+  	    opp_flip = {false,true}
+  	 end    
+  end
+end  
+
 __gfx__
 00000000c225522255555552255255525255555c00300000000000000000000000000000ffffffffffffffffffffffff00000000222222220000000000000000
 00000000cc55555555555555555555555255555c0bb03000003b00000000000000000000ffffffffffffffffffffffff000000002cccccc20000000000000000
@@ -100,14 +168,14 @@ __gfx__
 00000000cc5555252255552255555555255255cc0000000000000000fffff00fff00ffff0f0f0f0f0f0f0f0f0f0f0f0ff0ffff0f2ccc6cc20000000000000000
 00000000cc2555555555255225555255255555cc0000000000000000ffff00f0f00fffff0f0f0f0f0f0f0f0f0f0f0f0ff000000f2cccccc20000000000000000
 00000000c525525555555555255555555555525c0000000000000000fff00fff00ffffff00000000000000000000000ff0ffff0f222222220000000000000000
-00000000000000000000000000000000000000000000000000000000ff00f0f00fffffff00077000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000ffffffffffffffff00007000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000ffffffffffffffff07777000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000ffffffffffffffff70000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000ffffffffffffffff70660000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000ffffffffffffffff76666500000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000ffffffffffffffff66666770000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000ffffffffffffffff6666677e000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000ff00f0f00fffffff00000000000770000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000ffffffffffffffff00000000005775000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000ffffffffffffffff00000000000660000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000ffffffffffffffff00000000006666000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000ffffffffffffffff00000000006666000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000ffffffffffffffff00066650006666000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000ffffffffffffffff00666677000700000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000ffffffffffffffff7766667e000770000000000000000000000000000000000000000000
 __map__
 01020302020203031313030303020204090a0a0a0a0a0b000000000065666768696a6b6c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 01121303121313121213031202020214191a1a1a1a1a1b000000000075767778797a7b7c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
