@@ -69,9 +69,9 @@ function draw_opossum(sx,sy, state, flipped)
    spr(index,sx,sy,1,1,flipped[1], flipped[2])
 end
 
-function check_can_climb(level)
-  loc_x = opp_x + 4
-  loc_y = opp_y + 7 
+function can_climb(level,y_pos)
+  loc_x = opp_pos[1] + 4
+  loc_y = y_pos + 7 
   for ladder in all(level.straight_ladders)
   do
      lad_x = ladder[1] + 4
@@ -109,7 +109,7 @@ function _init()
   poke4(0x5f14,0x8786.8584)
   poke4(0x5f18,0x8b8a.8988)
   poke4(0x5f1c,0x8f8e.8d8c)
-  opp_pos = {50,122}
+  opp_pos = {50,115}
   end
 
 function _draw()
@@ -121,7 +121,6 @@ function _draw()
 end
 
 function _update()
-  can_climb = check_can_climb(l1)
   if(btn(0))
   then  
      opp_state = "walk" 
@@ -134,21 +133,18 @@ function _update()
      opp_pos[1] += 1
      opp_flip = {false,false}
   end
-  if(can_climb)
-  then
-    if(btn(2)) 
-    then 
-       opp_state = "climb"
-       opp_pos[2] -= 1
-       opp_flip = {false,false}
-  	 end
-  	 if(btn(3)) 
-  	 then 
-  	    opp_state ="climb"
-  	    opp_pos[2] += 1
-  	    opp_flip = {false,true}
-  	 end    
-  end
+  if(btn(2) and can_climb(l1,opp_pos[2] -1)) 
+  then 
+    opp_state = "climb"
+    opp_pos[2] -= 1
+    opp_flip = {false,false}
+	 end
+	 if(btn(3) and can_climb(l1,opp_pos[2] +1)) 
+  then 
+    opp_state ="climb"
+    opp_pos[2] += 1
+    opp_flip = {false,true}
+	 end    
 end  
 
 __gfx__
