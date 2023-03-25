@@ -27,9 +27,9 @@ l1.diag_ladders[1] = {48,90}
 l1.diag_ladders[2] = {56,82}
 l1.diag_ladders[3] = {64,74}
 l1.diag_ladders[4] = {72,66}
-l1.straight_ladders[1] = {56,99}
-l1.straight_ladders[2] = {56,107}
-l1.straight_ladders[3] = {56, 115}
+l1.straight_ladders[1] = {35,99}
+l1.straight_ladders[2] = {35,107}
+l1.straight_ladders[3] = {35, 115}
 l1.balconies[1] = {10,20}
 l1.balconies[2] = {64,52}
 l1.balconies[3] = {10,84}
@@ -56,9 +56,6 @@ function draw_foreground(level)
    palt(0, false)
    palt(15,true)
    foreach(level.balconies,draw_gate)
---   draw_gate(10,20)
---   draw_gate(64,52)
---   draw_gate(10,84)
    palt()
 end
 
@@ -81,7 +78,7 @@ function can_climb(level,y_pos,up)
      lad_x = ladder[1] + 4
      lad_y = ladder[2] + 4
      if ( abs(loc_x - lad_x ) < 4 and
-          abs(loc_y - lad_y ) < 7 ) 
+          abs(loc_y - lad_y ) < 5 ) 
      then
        return true
      end     
@@ -91,8 +88,9 @@ function can_climb(level,y_pos,up)
   do
      lad_x = ladder[1] + 4
      lad_y = ladder[2] + 4
-     if ( abs(loc_x - lad_x ) < 16 and
-          abs(loc_y - lad_y ) < 16 ) 
+     if ( (loc_x - lad_x ) < 16 and
+          (loc_x - lad_x ) > -4 and
+          abs(loc_y - lad_y ) < 7 ) 
      then
        if(up)
        then 
@@ -118,12 +116,13 @@ function can_walk(level,xpos)
     
   for balcony in all(level.balconies)
   do
-     if (loc_y < balcony[2] + 7 and
+     if (loc_y < balcony[2] + 10 and
          loc_y > balcony[2] - 6) 
      then
        if(loc_x < balcony[1] + 47 and
           loc_x > balcony[1])
        then
+         opp_pos[2] = balcony[2]+7 
          return true
       end
      end     
