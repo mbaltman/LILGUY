@@ -29,7 +29,9 @@ l1.diag_ladders[3] = {72,64}
 l1.straight_ladders[1] = {56,99}
 l1.straight_ladders[2] = {56,107}
 l1.straight_ladders[3] = {56, 115}
-
+l1.balconies[1] = {10,20}
+l1.balconies[2] = {64,52}
+l1.balconies[3] = {10,84}
 
 
 -->8
@@ -49,12 +51,13 @@ function draw_background(level)
 end
 
 
-function draw_foreground()  
+function draw_foreground(level)  
    palt(0, false)
-   palt(15,true) 
-   draw_gate(10,20)
-   draw_gate(64,52)
-   draw_gate(10,84)
+   palt(15,true)
+   foreach(level.balconies,draw_gate)
+--   draw_gate(10,20)
+--   draw_gate(64,52)
+--   draw_gate(10,84)
    palt()
 end
 
@@ -83,17 +86,19 @@ function can_climb(level,y_pos)
      end     
   end
   
-  for ladder in all(level.diag_ladders)
-  do
-  end
   return false
 end
 
+function can_walk(level,xpos)
+  loc_x = xpos
+  loc_y = opp_pos[2]+4  
+
+end
 
 
 -->8
-function draw_gate(x_pos, y_pos)  
-   map(16,0,x_pos,y_pos,7,2,0)	
+function draw_gate(coord)  
+  map(16,0,coord[1],coord[2],7,2,0)	
 end
 
 function draw_ladder_straight(coord) 
@@ -116,11 +121,12 @@ function _draw()
    cls()
    draw_background(l1)
    draw_opossum(opp_pos[1], opp_pos[2],opp_state, opp_flip)
-   draw_foreground()
+   draw_foreground(l1)
    camera(0,0)
 end
 
 function _update()
+  
   if(btn(0))
   then  
      opp_state = "walk" 
