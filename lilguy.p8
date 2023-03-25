@@ -23,9 +23,10 @@ opp_state = "walk"
 opp_flip = {false,false}
 
 l1 = level:new(nil)
-l1.diag_ladders[1] = {56,80}
-l1.diag_ladders[2] = {64,72}
-l1.diag_ladders[3] = {72,64}
+l1.diag_ladders[1] = {48,90}
+l1.diag_ladders[2] = {56,82}
+l1.diag_ladders[3] = {64,74}
+l1.diag_ladders[4] = {72,66}
 l1.straight_ladders[1] = {56,99}
 l1.straight_ladders[2] = {56,107}
 l1.straight_ladders[3] = {56, 115}
@@ -72,7 +73,7 @@ function draw_opossum(sx,sy, state, flipped)
    spr(index,sx,sy,1,1,flipped[1], flipped[2])
 end
 
-function can_climb(level,y_pos)
+function can_climb(level,y_pos,up)
   loc_x = opp_pos[1] + 4
   loc_y = y_pos + 7 
   for ladder in all(level.straight_ladders)
@@ -86,6 +87,23 @@ function can_climb(level,y_pos)
      end     
   end
   
+  for ladder in all(level.diag_ladders)
+  do
+     lad_x = ladder[1] + 4
+     lad_y = ladder[2] + 4
+     if ( abs(loc_x - lad_x ) < 16 and
+          abs(loc_y - lad_y ) < 16 ) 
+     then
+       if(up)
+       then 
+         opp_pos[1] += 1
+       else
+         opp_pos[1] -= 1
+       end
+       return true
+     end     
+  end
+   
   return false
 end
 
@@ -160,13 +178,13 @@ function _update()
      opp_pos[1] += 1
      opp_flip = {false,false}
   end
-  if(btn(2) and can_climb(l1,opp_pos[2] -1)) 
+  if(btn(2) and can_climb(l1,opp_pos[2] -1,true)) 
   then 
     opp_state = "climb"
     opp_pos[2] -= 1
     opp_flip = {false,false}
 	 end
-	 if(btn(3) and can_climb(l1,opp_pos[2] +1)) 
+	 if(btn(3) and can_climb(l1,opp_pos[2] +1,false)) 
   then 
     opp_state ="climb"
     opp_pos[2] += 1
