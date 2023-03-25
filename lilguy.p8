@@ -100,17 +100,18 @@ function can_walk(level,xpos)
     
   for balcony in all(level.balconies)
   do
-     if (balcony[2] > loc_y + 2 or
-         balcony[2] < loc_y -2) 
+     if (loc_y < balcony[2] + 7 and
+         loc_y > balcony[2] - 6) 
      then
-       if(loc_x > balcony[1] and 
-          loc_x < balcony[1] + 47)
-          then
-            return true
-          end
+       if(loc_x < balcony[1] + 47 and
+          loc_x > balcony[1])
+       then
+         return true
+      end
      end     
   end 
 
+  return false
 end
 
 
