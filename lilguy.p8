@@ -91,7 +91,25 @@ end
 
 function can_walk(level,xpos)
   loc_x = xpos
-  loc_y = opp_pos[2]+4  
+  loc_y = opp_pos[2]
+
+  
+  if( loc_y + 4 > 118 )
+  then return true end
+  
+    
+  for balcony in all(level.balconies)
+  do
+     if (balcony[2] > loc_y + 2 or
+         balcony[2] < loc_y -2) 
+     then
+       if(loc_x > balcony[1] and 
+          loc_x < balcony[1] + 47)
+          then
+            return true
+          end
+     end     
+  end 
 
 end
 
@@ -122,18 +140,20 @@ function _draw()
    draw_background(l1)
    draw_opossum(opp_pos[1], opp_pos[2],opp_state, opp_flip)
    draw_foreground(l1)
+   print("x" .. opp_pos[1])
+   print("y" .. opp_pos[2])
    camera(0,0)
 end
 
 function _update()
   
-  if(btn(0))
+  if(btn(0) and can_walk(l1,opp_pos[1]-1))
   then  
      opp_state = "walk" 
      opp_pos[1] -= 1
      opp_flip = {true,false}
   end
-  if(btn(1)) 
+  if(btn(1) and can_walk(l1,opp_pos[1]+1)) 
   then 
      opp_state ="walk"
      opp_pos[1] += 1
